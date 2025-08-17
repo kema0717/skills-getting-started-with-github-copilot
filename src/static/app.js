@@ -20,11 +20,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const spotsLeft = details.max_participants - details.participants.length;
 
+        // Participants list HTML
+        let participantsHTML = "";
+        if (details.participants.length > 0) {
+          participantsHTML = `
+            <div class="participants-section">
+              <strong>Participants:</strong>
+              <ul class="participants-list">
+                ${details.participants.map(p => `<li>${p}</li>`).join("")}
+              </ul>
+            </div>
+          `;
+        } else {
+          participantsHTML = `
+            <div class="participants-section">
+              <strong>Participants:</strong>
+              <span class="no-participants">No participants yet</span>
+            </div>
+          `;
+        }
+
         activityCard.innerHTML = `
           <h4>${name}</h4>
           <p>${details.description}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          ${participantsHTML}
         `;
 
         activitiesList.appendChild(activityCard);
@@ -80,6 +101,56 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Error signing up:", error);
     }
   });
+
+  // Chess Clubカードのみ表示する関数例
+  async function showChessClubCard() {
+    const activitiesList = document.getElementById("activities-list");
+    activitiesList.innerHTML = ""; // 他カードを消す
+
+    try {
+      const response = await fetch("/activities");
+      const activities = await response.json();
+      const details = activities["Chess Club"];
+      if (!details) {
+        activitiesList.innerHTML = "<p>Chess Club activity not found.</p>";
+        return;
+      }
+
+      const activityCard = document.createElement("div");
+      activityCard.className = "activity-card";
+      const spotsLeft = details.max_participants - details.participants.length;
+
+      let participantsHTML = "";
+      if (details.participants.length > 0) {
+        participantsHTML = `
+          <div class="participants-section">
+            <strong>Participants:</strong>
+            <ul class="participants-list">
+              ${details.participants.map(p => `<li>${p}</li>`).join("")}
+            </ul>
+          </div>
+        `;
+      } else {
+        participantsHTML = `
+          <div class="participants-section">
+            <strong>Participants:</strong>
+            <span class="no-participants">No participants yet</span>
+          </div>
+        `;
+      }
+
+      activityCard.innerHTML = `
+        <h4>Chess Club</h4>
+        <p>${details.description}</p>
+        <p><strong>Schedule:</strong> ${details.schedule}</p>
+        <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+        ${participantsHTML}
+      `;
+      activitiesList.appendChild(activityCard);
+    } catch (error) {
+      activitiesList.innerHTML = "<p>Failed to load Chess Club activity.</p>";
+    }
+  }
 
   // Initialize app
   fetchActivities();
